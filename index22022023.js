@@ -47,7 +47,8 @@
                 search_time: [],
                 reach_feedback: [],
                 group_type: null,
-                participant_category_resp: []
+                participant_category_resp: [],
+                practice_trial: []
             }
         },
         on_finish: function(data) {
@@ -59,8 +60,9 @@
             subject = data.subject;
             subjTrials = data.subjTrials;
 
-            // var fileName = "tgt_files/testShort.json";
-            var fileName = "/Users/nisanbaysal/Desktop/reaching exp git/tgt_files/testShort.json"
+            var fileName = "tgt_files/testShort.json";
+            // var fileName = "/Users/Patrick/Desktop/PACE reaching experiment/OnPoint-Pavlovia/tgt_files/testShort.json"
+
             $.getJSON(fileName, function(target_file_data) {
 
                 var experiment_ID = 'simple_reach';
@@ -70,6 +72,8 @@
                 var counter = 1;
 
                 var totalTrials = target_file_data.numtrials[0];
+                // var totalTrials = 6;
+
                 var rotation = target_file_data.rotation;
                 var target_angle = target_file_data.tgt_angle;
                 var online_fb = target_file_data.online_fb;
@@ -79,8 +83,12 @@
                 var target_jump = target_file_data.target_jump;
                 var num_trials = target_file_data.numtrials;
                 var stim_id = target_file_data.stim_id;
+                var img_file = target_file_data.img_file
                 var correct_resp = target_file_data.correct_resp;
                 var participant_category_resp = [];
+                var practice_trial = target_file_data.practice_trial;
+                var trialnum = target_file_data.trialnum;
+                // var practice_trial = [true, true, true, true, false, false];
 
                 var screen_height = window.screen.availHeight;
                 var screen_width = window.screen.availWidth;
@@ -100,7 +108,7 @@
                 var target_invisible = true;
                 var cursor_show = true;
 
-                var bb_counter = 0;
+                var instr_counter = 0;
                 var bb_mess = between_blocks[0];
                 var line_size = Math.round(screen_height / 30);
                 var message_size = String(line_size).concat("px");
@@ -110,8 +118,8 @@
                 var rt = 0;
                 var mt = 0;
                 var search_time = 0;
-                var feedback_time = 1000;
-                var feedback_time_slow = 1250;
+                var feedback_time = 2000;
+                var feedback_time_slow = 2250;
                 var hold_time = 500;
                 var hold_timer = null;
                 var fb_timer = null;
@@ -142,6 +150,13 @@
 
                 var search_tolerance = start_radius * 4 + cursor_radius * 4;
 
+                // // Initialise Practice trials
+                // var practice_no = [];
+                // if (practice_trial[trial] == true){
+                //   practice_no ++;
+                // }
+                // console.log('practice_no: ' + practice_no);
+
                 if (trial == 0) {
                     moveCursor();
                 }
@@ -159,6 +174,42 @@
                 $('html').css('cursor', 'none');
                 $('body').css('cursor', 'none');
                 $('#jspsych-content').css('cursor', 'none');
+
+                messages = [
+                    ["Dummy Message Test"],
+                    ["Your task is to move the cursor either to the left or right side of the screen.",
+                        "Please reach as close to the centre of the circle as possible.",
+                        "Press 'b' when you are ready to proceed."],
+                    ["This is an instruction understanding check, you may proceed ONLY if you choose the correct choice.",
+                        "Choosing the wrong choice will result in early game termination and an incomplete HIT!",
+                        "Press 'a' when you are ready to proceed."],
+                    ["The white dot will now be hidden.",
+                        "Continue aiming DIRECTLY towards the target.",
+                        "Press SPACE BAR when you are ready to proceed."],
+                    ["This is an attention check.",
+                        "Press the key 'e' on your keyboard to CONTINUE.",
+                        "Pressing any other key will result in a premature game termination and an incomplete HIT!"],
+                    ["This is an attention check.",
+                        "Press the key 'a' on your keyboard to CONTINUE.",
+                        "Pressing any other key will result in a premature game termination and an incomplete HIT!"],
+                    ["The white dot will no longer be under your control.",
+                        "IGNORE the white dot as best as you can and continue aiming DIRECTLY towards the target.",
+                        "This will be a practice trial",
+                        "Press SPACE BAR when you are ready to proceed."],
+                    ["Test test 1",
+                        "During the experiment you will encounter",
+                        "circles with black and white stripes like this.",
+                        "Press F when you are ready to proceed."],
+                    ["Test test 2",
+                        "Each cricle can differ in the thickness of the stripes.",
+                        "Press a when you are ready to proceed."],
+                    ["Test test 3",
+                        "They can also differ in the angle of the striples.",
+                        "Press B when you are ready to proceed."],
+                    ["Test test 4",
+
+                        "Press SPACE BAR when you are ready to proceed."]
+              ];
 
                 svgContainer = d3.select("#jspsych-content").append("svg")
                     .attr('width', screen_width)
@@ -191,18 +242,18 @@
    	                .attr('y', target_y-target_radius/2)
    	                .attr('width', target_radius)
    	                .attr('height', target_radius)
-   	                .attr('xlink:href', `img/0.png`)
+   	                .attr('xlink:href', `img/0_practice.png`)
    	                .attr('id', 'target')
-                    .attr('display', 'none');
+                    .attr('display', 'block');
 
                 svgContainer.append('svg:image')
                     .attr('x', target_x2-target_radius/2)
                     .attr('y', target_y-target_radius/2)
                     .attr('width', target_radius)
                     .attr('height', target_radius)
-                    .attr('xlink:href', `img/0.png`)
+                    .attr('xlink:href', `img/1_practice.png`)
                     .attr('id', 'target2')
-                    .attr('display', 'none');
+                    .attr('display', 'block');
 
                 //draw circle around target for feedback
                 svgContainer.append('circle')
@@ -254,7 +305,7 @@
                     .attr('font-size', message_size)
                     .attr('id', 'message-line-1')
                     .attr('display', 'block')
-                    .text('Move the white dot to the center.');
+                    .text(messages[7][0]);
 
                 svgContainer.append('text')
                     .attr('text-anchor', 'middle')
@@ -265,7 +316,7 @@
                     .attr('font-size', message_size)
                     .attr('id', 'message-line-2')
                     .attr('display', 'block')
-                    .text('The white dot will be visible during your reach.');
+                    .text(messages[7][1]);
 
                 svgContainer.append('text')
                     .attr('text-anchor', 'middle')
@@ -276,7 +327,7 @@
                     .attr('font-size', message_size)
                     .attr('id', 'message-line-3')
                     .attr('display', 'block')
-                    .text('Quickly move your white dot to the target.');
+                    .text(messages[7][2]);
 
                 svgContainer.append('text')
                     .attr('text-anchor', 'middle')
@@ -287,7 +338,7 @@
                     .attr('font-size', message_size)
                     .attr('id', 'message-line-4')
                     .attr('display', 'block')
-                    .text('Press SPACE BAR when you are ready to proceed.');
+                    .text(messages[7][3]);
 
                 too_slow_time = 300;
                 svgContainer.append('text')
@@ -300,6 +351,17 @@
                     .attr('id', 'too_slow_message')
                     .attr('display', 'none')
                     .text('Move Faster');
+
+                svgContainer.append('text')
+                    .attr('text-anchor', 'middle')
+                    .attr('x', screen_width / 2)
+                    .attr('y', screen_height / 2)
+                    .attr('fill', 'red')
+                    .attr('font-family', 'sans-serif')
+                    .attr('font-size', message_size)
+                    .attr('id', 'inaccurate_message')
+                    .attr('display', 'none')
+                    .text('Atrocious reach, please try to be better next time.');
 
                 search_too_slow = 3000;
                 svgContainer.append('text')
@@ -323,37 +385,6 @@
                     .attr('id', 'trialcount')
                     .attr('display', 'none')
                     .text('Reach Number: ' + counter + ' / ' + totalTrials);
-
-
-                messages = [
-                    ["Dummy Message Test"],
-                    ["The white dot will now be visible.",
-                        "Quickly move your white dot to the target.",
-                        "Press 'b' when you are ready to proceed."
-                    ],
-                    ["This is an instruction understanding check, you may proceed ONLY if you choose the correct choice.",
-                        "Choosing the wrong choice will result in early game termination and an incomplete HIT!",
-                        "Press 'a' if you should ignore the white dot and aim directly towards the target.",
-                        "Press 'b' if you should be aiming away from the target."
-                    ],
-                    ["The white dot will now be hidden.",
-                        "Continue aiming DIRECTLY towards the target.",
-                        "Press SPACE BAR when you are ready to proceed."
-                    ],
-                    ["This is an attention check.",
-                        "Press the key 'e' on your keyboard to CONTINUE.",
-                        "Pressing any other key will result in a premature game termination and an incomplete HIT!"
-                    ],
-                    ["This is an attention check.",
-                        "Press the key 'a' on your keyboard to CONTINUE.",
-                        "Pressing any other key will result in a premature game termination and an incomplete HIT!"
-                    ],
-                    ["The white dot will no longer be under your control.",
-                        "IGNORE the white dot as best as you can and continue aiming DIRECTLY towards the target.",
-                        "This will be a practice trial",
-                        "Press SPACE BAR when you are ready to proceed."
-                    ]
-                ];
 
                 /***************************************
                  * Pointer Lock Variables and Functions *
@@ -573,9 +604,16 @@
 
                 function search_phase() {
                     game_phase = SEARCHING;
+                    console.log('searching')
                     d3.select('#mouse_wiggle_notice').attr('display', 'block')
                     // cursor_show = true;
                     begin = new Date();
+                    //nisan
+                    if(practice_trial = true){
+                        d3.select('#trialcount').attr('display', 'none');
+                    }else{
+                    d3.select('#trialcount').attr('display', 'block');}
+
                     d3.select('#start').attr('display', 'block').attr('fill', 'none');
                     d3.select('#target').attr('display', 'none').attr('fill', 'blue');
                     d3.select('#target2').attr('display', 'none').attr('fill', 'blue');
@@ -585,33 +623,65 @@
                     d3.select('#message-line-3').attr('display', 'none');
                     d3.select('#message-line-4').attr('display', 'none');
                     d3.select('#too_slow_message').attr('display', 'none');
-                    d3.select('#trialcount').attr('display', 'block');
+                    d3.select('#inaccurate_message').attr('display', 'none');
+
                 }
 
                 function hold_phase() {
                     game_phase = HOLDING;
+                    console.log('holding')
                 }
 
                 function show_targets() {
-                    game_phase = SHOW_TARGETS;
+                  // NOTE this code adds 4 (for trial 0 -> 3) practice trials right here
+                  if (practice_trial[trial] == true){ // practice trials
+                    game_phase = SHOW_TARGETS
                     d3.select('#message-line-1').attr('display', 'none');
                     search_time = new Date() - begin;
                     begin = new Date();
-
+                    //nisan
+                    d3.select('#trialcount').attr('display', 'none');
                     d3.select('#mouse_wiggle_notice').attr('display', 'none');
 
-                    d3.select('#target').attr('xlink:href', `img/${[trial]}.png`)
+                    // d3.select('#target').attr('xlink:href', `img/${img_file[trial]}`)
+                    d3.select('#target').attr('xlink:href', `img/blue.png`)
                     target_x = start_x + target_dist * Math.cos(target_angle[trial] * Math.PI / 180);
                     target_y = start_y - target_dist * Math.sin(target_angle[trial] * Math.PI / 180);
                     d3.select('#target').attr('display', 'block').attr('cx', target_x).attr('cy', target_y);
                     target_invisible = false;
 
-                    d3.select('#target2').attr('xlink:href', `img/${[trial]}.png`)
+                    // d3.select('#target2').attr('xlink:href', `img/${img_file[trial]}`)
+                    d3.select('#target2').attr('xlink:href', `img/blue.png`)
                     target_x2 = start_x + target_dist * Math.cos(target_angle[trial] * Math.PI / 180);
                     target_y = start_y - target_dist * Math.sin(target_angle[trial] * Math.PI / 180);
                     d3.select('#target2').attr('display', 'block').attr('cx', target_x2).attr('cy', target_y);
                     target_invisible = false;
+
+                  } else { // main trials
+                    game_phase = SHOW_TARGETS;
+                    d3.select('#practice_trial_message').attr('display', 'none');
+                    search_time = new Date() - begin;
+                    begin = new Date();
+
+                    d3.select('#mouse_wiggle_notice').attr('display', 'none');
+
+                    // d3.select('#target').attr('xlink:href', `img/${[trial]}.png`)
+                    d3.select('#target').attr('xlink:href', `img/${img_file[trial]}`)
+                    // d3.select('#target').attr('xlink:href', `img/orange.png`)
+                    target_x = start_x + target_dist * Math.cos(target_angle[trial] * Math.PI / 180);
+                    target_y = start_y - target_dist * Math.sin(target_angle[trial] * Math.PI / 180);
+                    d3.select('#target').attr('display', 'block').attr('cx', target_x).attr('cy', target_y);
+                    target_invisible = false;
+
+                    d3.select('#target2').attr('xlink:href', `img/${img_file[trial]}`)
+                    // d3.select('#target2').attr('xlink:href', `img/orange.png`)
+                    target_x2 = start_x + target_dist * Math.cos(target_angle[trial] * Math.PI / 180);
+                    target_y = start_y - target_dist * Math.sin(target_angle[trial] * Math.PI / 180);
+                    d3.select('#target2').attr('display', 'block').attr('cx', target_x2).attr('cy', target_y);
+                    target_invisible = false;
+                  }
                 }
+
 
                 function moving_phase() {
                     game_phase = MOVING;
@@ -619,17 +689,36 @@
                     begin = new Date();
                     d3.select('#start').attr('fill', 'none');
                     d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                    d3.select('#message-line-1').attr('display', 'none')
+                    d3.select('#message-line-2').attr('display', 'none')
+                    d3.select('#message-line-3').attr('display', 'none')
+                    d3.select('#message-line-4').attr('display', 'none')
                 }
+
 
                 function fb_phase() {
                     game_phase = FEEDBACK;
-
+                    console.log('feedback')
                     // Record movement time as time spent reaching before intersecting target circle
                     // Can choose to add audio in later if necessary
                     mt = new Date() - begin;
                     d3.select('#cursor').attr('display', 'none');
                     d3.select('#feedback_circleR').attr('display', 'none');
                     d3.select('#feedback_circleL').attr('display', 'none');
+
+                    // Note that the below chunk of code (hand_fb_angle calculation) shifted up above these feeback conditionals [Alex 11/02/2023]
+                    // Record the hand location immediately after crossing target ring
+                    // projected back onto target ring (since mouse doesn't sample fast enough)
+                    hand_fb_angle = Math.atan2(start_y - hand_y, hand_x - start_x) * 180 / Math.PI;
+                    if (hand_fb_angle < 0) {
+                        hand_fb_angle = 360 + hand_fb_angle; // Corrected so that it doesn't have negative angles
+                    }
+                    hand_fb_x = start_x + target_dist * Math.cos(hand_fb_angle * Math.PI / 180);
+                    hand_fb_y = start_y - target_dist * Math.sin(hand_fb_angle * Math.PI / 180);
+
+                    angle_sens = 20;
+
+                    // Tinkering
 
                     if (mt > too_slow_time) {
                         // d3.select('#target').attr('fill', 'red');
@@ -640,36 +729,99 @@
                         d3.select('#too_slow_message').attr('display', 'block');
                         d3.select('#start').attr('display', 'none');
                         reach_feedback = "too_slow";
-                    // } else {
-                    //     reach_feedback = "good_reach";
-                    // }
-                    // d3.select('#target').attr('fill', 'green');
-                    } else if (correct_resp[trial] === 1.0 && cursor_x < start_x) {
-                         reach_feedback = "good_reach";
-                         d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'green');
-                         participant_category_resp = "A";
-                    } else if (correct_resp[trial] === 1.0 && cursor_x > start_x) {
-                         reach_feedback = "good_reach";
-                         d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'red');
-                         participant_category_resp = "B";
-                    } else if (correct_resp[trial] === 2.0 && cursor_x > start_x) {
-                          reach_feedback = "good_reach";
-                          d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'green');
-                          participant_category_resp = "B";
-                    } else if (correct_resp[trial] === 2.0 && cursor_x < start_x) {
-                          reach_feedback = "good_reach";
-                          d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'red');
-                          participant_category_resp = "A";
+
+                    } else if (cursor_x < start_x) {
+                        participant_category_resp = "A"
+                            if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) {
+                                reach_feedback = "inaccurate_reach";
+                                inaccurate_reach_message();
+                            } else if (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens)) {
+                                reach_feedback = "inaccurate_reach";
+                                inaccurate_reach_message();
+                            } else if (correct_resp[trial] == 1) {
+                                reach_feedback = "good_reach";
+                                d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'green');
+                            } else if (correct_resp[trial] == 2){
+                                reach_feedback = "good_reach";
+                                d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'red');
+                            }
+                    } else if (cursor_x > start_x) {
+                        participant_category_resp = "B"
+                          if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) {
+                              reach_feedback = "inaccurate_reach";
+                              inaccurate_reach_message();
+                          } else if (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens)) {
+                              reach_feedback = "inaccurate_reach";
+                              inaccurate_reach_message();
+                          } else if (correct_resp[trial] == 1) {
+                              reach_feedback = "good_reach";
+                              d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'red');
+                          } else if (correct_resp[trial] == 2){
+                              reach_feedback = "good_reach";
+                              d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'green');
+                          }
                     }
 
-                    // Record the hand location immediately after crossing target ring
-                    // projected back onto target ring (since mouse doesn't sample fast enough)
-                    hand_fb_angle = Math.atan2(start_y - hand_y, hand_x - start_x) * 180 / Math.PI;
-                    if (hand_fb_angle < 0) {
-                        hand_fb_angle = 360 + hand_fb_angle; // Corrected so that it doesn't have negative angles
+                    function inaccurate_reach_message() {
+                        d3.select('#target').attr('display', 'none');
+                        d3.select('#target2').attr('display', 'none');
+                        d3.select('#cursor').attr('display', 'none');
+                        d3.select('#inaccurate_message').attr('display', 'block');
+                        d3.select('#start').attr('display', 'none');
                     }
-                    hand_fb_x = start_x + target_dist * Math.cos(hand_fb_angle * Math.PI / 180);
-                    hand_fb_y = start_y - target_dist * Math.sin(hand_fb_angle * Math.PI / 180);
+
+                    // if (mt > too_slow_time) {
+                    //     // d3.select('#target').attr('fill', 'red');
+                    //     if_slow = true;
+                    //     d3.select('#target').attr('display', 'none');
+                    //     d3.select('#target2').attr('display', 'none');
+                    //     d3.select('#cursor').attr('display', 'none');
+                    //     d3.select('#too_slow_message').attr('display', 'block');
+                    //     d3.select('#start').attr('display', 'none');
+                    //     reach_feedback = "too_slow";
+                    // // } else {
+                    // //     reach_feedback = "good_reach";
+                    // // }
+                    // // d3.select('#target').attr('fill', 'green');
+                    // } else if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) {
+                    //       d3.select('#target').attr('display', 'none');
+                    //       d3.select('#target2').attr('display', 'none');
+                    //       d3.select('#cursor').attr('display', 'none');
+                    //       d3.select('#inaccurate_message').attr('display', 'block');
+                    //       d3.select('#start').attr('display', 'none');
+                    //       reach_feedback = "inaccurate_reach";
+                    //       participant_category_resp = null;
+                    // } else if (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens)) {
+                    //       d3.select('#target').attr('display', 'none');
+                    //       d3.select('#target2').attr('display', 'none');
+                    //       d3.select('#cursor').attr('display', 'none');
+                    //       d3.select('#inaccurate_message').attr('display', 'block');
+                    //       d3.select('#start').attr('display', 'none');
+                    //       reach_feedback = "inaccurate_reach";
+                    //       participant_category_resp = null;
+                    // } else if (correct_resp[trial] === 1 && cursor_x < start_x) {
+                    //      reach_feedback = "good_reach";
+                    //      d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'green');
+                    //      participant_category_resp = "A";
+                    // } else if (correct_resp[trial] === 1 && cursor_x > start_x) {
+                    //      reach_feedback = "good_reach";
+                    //      d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'red');
+                    //      participant_category_resp = "B";
+                    // } else if (correct_resp[trial] === 2 && cursor_x > start_x) {
+                    //       reach_feedback = "good_reach";
+                    //       d3.select('#feedback_circleR').attr('display', 'block').attr('stroke', 'green');
+                    //       participant_category_resp = "B";
+                    // } else if (correct_resp[trial] === 2 && cursor_x < start_x) {
+                    //       reach_feedback = "good_reach";
+                    //       d3.select('#feedback_circleL').attr('display', 'block').attr('stroke', 'red');
+                    //       participant_category_resp = "A";
+                    // }
+
+                    // hand_fb_angle calculation code taken from here [Alex 11/02/2023]
+
+                    // console log of Hnd_fb_angle for scoring system troubleshooting
+                    console.log('HAND FEEDBACK ANGLE ' + hand_fb_angle + ', for reach: ' + counter);
+
 
                     // Display Cursor Endpoint Feedback
                     if (clamped_fb[trial]) { // Clamped feedback
@@ -720,6 +872,7 @@
                     subjTrials.search_time.push(search_time);
                     subjTrials.reach_feedback.push(reach_feedback);
                     subjTrials.participant_category_resp.push(participant_category_resp);
+                    subjTrials.practice_trial.push(practice_trial);
 
                     console.log(subjTrials)
 
@@ -737,15 +890,19 @@
                     // Increment the trial count
                     trial += 1;
                     counter += 1;
-                    d3.select('#trialcount').text('Reach Number: ' + counter + ' / ' + totalTrials);
+                    if (practice_trial[trial] == true){
+                    } else{
+                      d3.select('#trialcount').text('Reach Number: ' + counter + ' / ' + totalTrials);}
 
                     // Ensure target, cursor invisible
+
                     d3.select('#target').attr('display', 'none');
                     d3.select('#target2').attr('display', 'none');
                     d3.select('#cursor').attr('display', 'none');
                     d3.select('#feedback_circleL').attr('display', 'none')
                     d3.select('#feedback_circleR').attr('display', 'none')
                     d3.select('#mouse_wiggle_notice').attr('display', 'block')
+                    
                     target_invisible = true; // for clicking, currently not employed
 
                     // Teleport cursor back to center
@@ -759,48 +916,196 @@
                         document.removeEventListener('click', setPointerLock, false);
                         document.exitPointerLock();
                         endGame();
-                    } else if (bb_mess || counter == 1) {
+                    // } else if (bb_mess || counter == 1 && (instr_counter == 0 && practice_trial == true && trialnum == -1)) {
+                    //     game_phase = BETWEEN_BLOCKS;
+                    //     console.log('bb practice slide 2')
+                    //     d3.select('#message-line-1').attr('display', 'block').text(messages[8][0]); // need to make sure these aren't a hack job later
+                    //     d3.select('#message-line-2').attr('display', 'block').text(messages[8][1]);
+                    //     d3.select('#message-line-3').attr('display', 'block').text(messages[8][2]);
+                    //     d3.select('#message-line-4').attr('display', 'block').text(messages[8][3]);
+                    //     d3.select('#target2').attr('xlink:href', `img/0_practice.png`).attr('display', 'block');
+                    //
+                    //     d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                    //     d3.select('#too_slow_message').attr('display', 'none');
+                    //     d3.select('#trialcount').attr('display', 'block');
+                    //     d3.select('#start').attr('display', 'none');
+                    // } else if (bb_mess || counter == 1 && (instr_counter == 1 && practice_trial == true && trialnum == -2)) {
+                    //     game_phase = BETWEEN_BLOCKS;
+                    //     console.log('bb practice slide 3')
+                    //     d3.select('#message-line-1').attr('display', 'block').text(messages[9][0]); // need to make sure these aren't a hack job later
+                    //     d3.select('#message-line-2').attr('display', 'block').text(messages[9][1]);
+                    //     d3.select('#message-line-3').attr('display', 'block').text(messages[9][2]);
+                    //     d3.select('#message-line-4').attr('display', 'block').text(messages[9][3]);
+                    //     d3.select('#target2').attr('xlnk:href', `img/orange.png`).attr('display', 'block')
+                    //
+                    //     d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                    //     d3.select('#too_slow_message').attr('display', 'none');
+                    //     d3.select('#trialcount').attr('display', 'block');
+                    //     d3.select('#start').attr('display', 'none');
+                    } else if (bb_mess) {
                         game_phase = BETWEEN_BLOCKS;
+                        instr_counter += 1;
+
                         d3.select('#message-line-1').attr('display', 'block').text(messages[bb_mess][0]);
                         d3.select('#message-line-2').attr('display', 'block').text(messages[bb_mess][1]);
                         d3.select('#message-line-3').attr('display', 'block').text(messages[bb_mess][2]);
                         d3.select('#message-line-4').attr('display', 'block').text(messages[bb_mess][3]);
+                        d3.select('#mouse_wiggle_notice').attr('display', 'none')
                         d3.select('#too_slow_message').attr('display', 'none');
-                        d3.select('#trialcount').attr('display', 'block');
+                        d3.select('#inaccurate_message').attr('display', 'none');
+                        //nisan
+                        d3.select('#trialcount').attr('display', 'none');
                         d3.select('#start').attr('display', 'none');
-                        bb_counter += 1;
+                        console.log('CANT WAKE UP')
                     } else {
                         // Start next trial
                         search_phase();
-
                     }
                 }
 
                 function advance_block(event) {
-                    var SPACE_BAR = 32;
-                    var a = 65;
-                    var e = 69;
-                    var b = 66;
-                    var f = 70;
-                    // bb_mess 1 --> b, 2 or 5 --> a, 3 or 6 --> space, 4 --> e
-                    if ((game_phase == BETWEEN_BLOCKS && (bb_mess == 5 || bb_mess == 2) && event.keyCode == a) || bb_mess == 0) {
+                  	var SPACE_BAR = 32;
+                  	var a = 65;
+                  	var e = 69;
+                  	var b = 66;
+                  	var f = 70;
+                    var arrow_fwd = 39;
+                  	// var esc = 27;
+                  	// var tilde = 176;
+                  	var caps = 20;
+                  	// bb_mess 1 --> b, 2 or 5 --> a, 3 or 6 --> space, 4 --> e
+                  	if (event.keyCode == caps) {
+                      	console.log("premature end");
+                      	console.log(bb_mess);
+                      	window.removeEventListener('resize', monitorWindow, false);
+                      	document.removeEventListener('click', setPointerLock, false);
+                      	document.exitPointerLock();
+                      	badGame(); // Premature exit game if failed attention check
+                  	} else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 0) && event.keyCode == f) {
+                        instruction_phase_slide_2();
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 1) && event.keyCode == a) {
+                        instruction_phase_slide_3();
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 2) && event.keyCode == b) {
+                        instruction_phase_slide_4();
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 3) && event.keyCode == SPACE_BAR) {
                         search_phase();
-                    } else if ((game_phase == BETWEEN_BLOCKS && bb_mess == 4 && event.keyCode == e)) {
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 4) && event.keyCode == SPACE_BAR) {
+                        instruction_phase_slide_5();
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 5) && event.keyCode == SPACE_BAR) {
                         search_phase();
-                    } else if (game_phase == BETWEEN_BLOCKS && bb_mess == 1 && event.keyCode == b) {
+                    } else if ((game_phase == BETWEEN_BLOCKS && instr_counter == 6) && event.keyCode == SPACE_BAR) {
                         search_phase();
-                    } else if (game_phase == BETWEEN_BLOCKS && event.keyCode == SPACE_BAR && (bb_mess == 3 || bb_mess == 6)) {
-                        search_phase();
-                    } else if (game_phase != BETWEEN_BLOCKS) {
-                        // Do nothing
-                    } else {
-                        console.log("premature end");
-                        console.log(bb_mess);
-                        window.removeEventListener('resize', monitorWindow, false);
-                        document.removeEventListener('click', setPointerLock, false);
-                        document.exitPointerLock();
-                        badGame(); // Premature exit game if failed attention check
-                    }
+                    } else if (practice_trial == false && ((game_phase == BETWEEN_BLOCKS && (bb_mess == 5 || bb_mess == 2) && event.keyCode == a) || bb_mess == 0)) {
+                      	search_phase();
+                  	} else if (practice_trial == false && ((game_phase == BETWEEN_BLOCKS && bb_mess == 4 && event.keyCode == e))) {
+                      	search_phase();
+                  	} else if (practice_trial == false && (game_phase == BETWEEN_BLOCKS && bb_mess == 1 && event.keyCode == b)) {
+                      	search_phase();
+                  	} else if (practice_trial == false && (game_phase == BETWEEN_BLOCKS && event.keyCode == SPACE_BAR && (bb_mess == 3 || bb_mess == 6))) {
+                      	search_phase();
+                  	} else if (game_phase != BETWEEN_BLOCKS) {
+                      	// Do nothing
+                  	} else {
+                      	d3.select('#message-line-1').attr('display', 'block').text('Invalid Key');
+                  	}
+              	}
+
+                function instruction_phase_slide_2 () {
+                  game_phase == BETWEEN_BLOCKS;
+                  instr_counter += 1;
+
+                  trial_type = "practice";
+                  reach_feedback = "practice";
+
+                  console.log('bb practice slide 2')
+                  console.log(instr_counter)
+                  d3.select('#message-line-1').attr('display', 'block').text(messages[8][0]); // need to make sure these aren't a hack job later
+                  d3.select('#message-line-2').attr('display', 'block').text(messages[8][1]);
+                  d3.select('#message-line-3').attr('display', 'block').text(messages[8][2]);
+                  d3.select('#message-line-4').attr('display', 'block').text(messages[8][3]);
+                  d3.select('#target2').attr('xlink:href', `img/0_practice.png`).attr('display', 'block');
+
+                  d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                  d3.select('#too_slow_message').attr('display', 'none');
+                  d3.select('#inaccurate_message').attr('display', 'none');
+                  //nisan
+                  d3.select('#trialcount').attr('display', 'none');
+                  d3.select('#start').attr('display', 'none');
+
+                  counter = 1;
+                }
+
+                function instruction_phase_slide_3 () {
+                  game_phase == BETWEEN_BLOCKS;
+                  instr_counter += 1;
+
+                  trial_type = "practice";
+                  reach_feedback = "practice";
+
+                  console.log('bb practice slide 3')
+                  console.log(instr_counter)
+                  d3.select('#message-line-1').attr('display', 'block').text(messages[9][0]); // need to make sure these aren't a hack job later
+                  d3.select('#message-line-2').attr('display', 'block').text(messages[9][1]);
+                  d3.select('#message-line-3').attr('display', 'block').text(messages[9][2]);
+                  d3.select('#message-line-4').attr('display', 'block').text(messages[9][3]);
+                  d3.select('#target2').attr('xlink:href', `img/0_practice.png`).attr('display', 'block');
+
+                  d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                  d3.select('#too_slow_message').attr('display', 'none');
+                  d3.select('#inaccurate_message').attr('display', 'none');
+                  //nisan
+                  d3.select('#trialcount').attr('display', 'none');
+                  d3.select('#start').attr('display', 'none');
+
+                  counter = 1;
+                }
+
+                function instruction_phase_slide_4 () {
+                  game_phase == BETWEEN_BLOCKS;
+                  instr_counter += 1;
+
+                  trial_type = "practice";
+                  reach_feedback = "practice";
+
+                  console.log('bb practice slide 4')
+                  console.log(instr_counter)
+                  d3.select('#message-line-1').attr('display', 'block').text(messages[10][0]); // need to make sure these aren't a hack job later
+                  d3.select('#message-line-2').attr('display', 'block').text(messages[10][1]);
+                  d3.select('#message-line-3').attr('display', 'block').text(messages[10][2]);
+                  d3.select('#message-line-4').attr('display', 'block').text(messages[10][3]);
+                  d3.select('#target2').attr('xlink:href', `img/0_practice.png`).attr('display', 'block');
+
+                  d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                  d3.select('#too_slow_message').attr('display', 'none');
+                  d3.select('#inaccurate_message').attr('display', 'none');
+                  //nisan
+                  d3.select('#trialcount').attr('display', 'none');
+                  d3.select('#start').attr('display', 'none');
+
+                  counter = 1;
+                }
+
+                function instruction_phase_slide_5 () {
+                  game_phase == BETWEEN_BLOCKS;
+                  instr_counter += 1;
+
+                  trial_type = "practice";
+                  reach_feedback = "practice";
+
+                  console.log('bb practice slide 5')
+                  console.log(instr_counter)
+                  d3.select('#message-line-1').attr('display', 'block').text(messages[0][0]); // need to make sure these aren't a hack job later
+                  d3.select('#message-line-2').attr('display', 'block').text(messages[0][1]);
+                  d3.select('#message-line-3').attr('display', 'block').text(messages[0][2]);
+                  d3.select('#message-line-4').attr('display', 'block').text(messages[0][3]);
+                  d3.select('#target2').attr('xlink:href', `img/0_practice.png`).attr('display', 'block');
+
+                  d3.select('#mouse_wiggle_notice').attr('display', 'none')
+                  d3.select('#too_slow_message').attr('display', 'none');
+                  d3.select('#inaccurate_message').attr('display', 'none');
+                  //nisan
+                  d3.select('#trialcount').attr('display', 'none');
+                  d3.select('#start').attr('display', 'none');
                 }
 
                 // Function used to enter full screen mode
@@ -850,6 +1155,7 @@
                     d3.select('#message-line-3').attr('display', 'none');
                     d3.select('#message-line-4').attr('display', 'none');
                     d3.select('#too_slow_message').attr('display', 'none');
+                    d3.select('#inaccurate_message').attr('display', 'none');
                     d3.select('#search_too_slow').attr('display', 'none');
                     d3.select('#countdown').attr('display', 'none');
                     d3.select('#trialcount').attr('display', 'none');
