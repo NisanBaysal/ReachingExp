@@ -1,3 +1,5 @@
+//nisan's change//
+
     /* initialize jsPsych */
     var jsPsych = initJsPsych({
         override_safe_mode: true,
@@ -902,7 +904,7 @@
                     d3.select('#feedback_circleL').attr('display', 'none')
                     d3.select('#feedback_circleR').attr('display', 'none')
                     d3.select('#mouse_wiggle_notice').attr('display', 'block')
-                    
+
                     target_invisible = true; // for clicking, currently not employed
 
                     // Teleport cursor back to center
