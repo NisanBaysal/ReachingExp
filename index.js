@@ -196,18 +196,14 @@ var trial = {
                     "IGNORE the white dot as best as you can and continue aiming DIRECTLY towards the target.",
                     "This will be a practice trial",
                     "Press SPACE BAR when you are ready to proceed."],
-                ["Test test 1",
-                    "During the experiment you will encounter",
+                ["During the experiment you will encounter",
                     "circles with black and white stripes like this.",
                     "Press F when you are ready to proceed."],
-                ["Test test 2",
-                    "Each cricle can differ in the thickness of the stripes.",
-                    "Press a when you are ready to proceed."],
-                ["Test test 3",
-                    "They can also differ in the angle of the striples.",
+                ["Each cricle can differ in the thickness of the stripes.",
+                    "Press A when you are ready to proceed."],
+                ["They can also differ in the angle of the striples.",
                     "Press B when you are ready to proceed."],
-                ["Test test 4",
-                    "Press SPACE BAR when you are ready to proceed."]
+                ["Press SPACE BAR when you are ready to proceed."]
             ];
 
             svgContainer = d3.select("#jspsych-content").append("svg")
@@ -645,7 +641,7 @@ var trial = {
 
                 if (practice_trial[trial] == true){
                     if (trialnum[trial] == -1) {
-                        d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of the circle on the right.');
+                        d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of either circle.');
                     } else if (trialnum[trial] == -2) {
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of the circle on the left.');
                     } else if (trialnum[trial] == -3) {
@@ -808,18 +804,31 @@ var trial = {
                     d3.select('#start').attr('display', 'none');
                 }
 
+                var upper_deadzone = (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens))
+                var lower_deadzone = (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens))
+
+                var left_safezone = hand_fb_angle < 180
+
                 function practice_trial_feedback() {
                     if (trialnum[trial] == -1 || trialnum[trial] == -2) {
-                        if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) {
-                            reach_feedback = "inaccurate_reach";
-                            d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
-                        } else if (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens)) {
-                            reach_feedback = "inaccurate_reach";
-                            d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
-                        } else {
-                            reach_feedback = "good_reach";
-                            d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
-                        }
+                          if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) { // if reaching into upper inaccurate zone, display inaccurate message
+                              reach_feedback = "inaccurate_reach";
+                              d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
+                          } else if (hand_fb_angle > (180 + angle_sens) && hand_fb_angle < (360 - angle_sens)) { // if reaching into lower inaccurate zone, display inaccurate message
+                              reach_feedback = "inaccurate_reach";
+                              d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
+                          } else {
+                              reach_feedback = "good_reach";
+                                if (trialnum[trial] == -1) {
+                                      d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
+                                } else if (correct_resp[trial] == 1 && cursor_x < start_x) {
+                                      d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
+                                } else if (correct_resp[trial] == 2 && cursor_x > start_x) {
+                                      d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
+                                } else {
+                                      d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Wrong side! Try again!');
+                                }
+                          }
                     } else if (trialnum[trial] == -3 || trialnum[trial] == -4) {
                           if (cursor_x < start_x) {
                               participant_category_resp = "A"
@@ -985,6 +994,10 @@ var trial = {
                 trial += 1;
                 counter += 1;
                 d3.select('#trialcount').text('Reach Number: ' + counter + ' / ' + totalTrials);
+
+                if (trialnum == -1) {
+                  trial = 0
+                }
 
                 // Ensure target, cursor invisible
                 d3.select('#target').attr('display', 'none');
