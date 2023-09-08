@@ -952,7 +952,7 @@ var trial = {
                 cursor_show = false;
 
                 // Uploading reach data for this reach onto the database
-                //SubjTrials.group_type is defined in startGame
+                // SubjTrials.group_type is defined in startGame
                 subjTrials.experimentID = experiment_ID;
                 subjTrials.id = subject.id;
                 subjTrials.currentDate.push(current_date);
