@@ -196,6 +196,7 @@ var trial = {
                     "IGNORE the white dot as best as you can and continue aiming DIRECTLY towards the target.",
                     "This will be a practice trial",
                     "Press SPACE BAR when you are ready to proceed."],
+
                 ["During the experiment you will encounter",
                     "circles with black and white stripes like this.",
                     "Press F when you are ready to proceed."],
@@ -555,6 +556,7 @@ var trial = {
                         cursor_show = true;
                     }
 
+
                     // Display the cursor if flag is on
                     if (cursor_show) {
                         d3.select('#cursor').attr('display', 'block');
@@ -568,6 +570,7 @@ var trial = {
                     // Displaying the start circle and trial count
                     d3.select('#start').attr('display', 'block');
                     d3.select('#trialcount').attr('display', 'block');
+
 
                     // Displaying searching too slow message if threshold is crossed
                     if (new Date() - begin > search_too_slow) {
@@ -641,7 +644,9 @@ var trial = {
 
                 if (practice_trial[trial] == true){
                     if (trialnum[trial] == -1) {
+
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of either circle.');
+
                     } else if (trialnum[trial] == -2) {
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of the circle on the left.');
                     } else if (trialnum[trial] == -3) {
@@ -650,6 +655,7 @@ var trial = {
                     }
                 }
             }
+
 
             function hold_phase() {
                 game_phase = HOLDING;
@@ -739,7 +745,9 @@ var trial = {
 
                 angle_sens = 20;
 
+
                 // Tinkering
+
 
                 if (mt > too_slow_time) {
                     // d3.select('#target').attr('fill', 'red');
@@ -949,6 +957,7 @@ var trial = {
                     fb_timer = setTimeout(next_trial, feedback_time);
                 }
             }
+
 
             function next_trial() {
                 var d = new Date();
