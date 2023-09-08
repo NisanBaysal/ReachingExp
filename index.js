@@ -60,8 +60,8 @@ var trial = {
         subject = data.subject;
         subjTrials = data.subjTrials;
 
-        var fileName = "tgt_files/testShort.json";
-        // var fileName = "/Users/Patrick/Desktop/PACE reaching experiment/OnPoint-Pavlovia/tgt_files/testShort.json"
+        var fileName = "tgt_files/testLong.json";
+        // var fileName = "/Users/Patrick/Desktop/PACE reaching experiment/OnPoint-Pavlovia/tgt_files/testLong.json"
 
         $.getJSON(fileName, function(target_file_data) {
 
@@ -640,11 +640,11 @@ var trial = {
                 d3.select('#trialcount').attr('display', 'block');
 
                 if (practice_trial[trial] == true){
-                    if (trialnum[trial] == -1) {
+                    if (trialnum[trial] == -21) {
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of either circle.');
-                    } else if (trialnum[trial] == -2) {
+                    } else if (trialnum[trial] == -20) {
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('Try to reach for the centre of the circle on the left.');
-                    } else if (trialnum[trial] == -3) {
+                    } else if (trialnum[trial] == -10) {
                         d3.select('#practice_trial_message_1').attr('display', 'block').text('For practice purposes, we have labeled A and B for you.');
                         d3.select('#practice_trial_message_2').attr('display', 'block').text('Try and guess which group this pattern belongs to.');
                     }
@@ -810,7 +810,7 @@ var trial = {
                 var left_safezone = hand_fb_angle < 180
 
                 function practice_trial_feedback() {
-                    if (trialnum[trial] == -1 || trialnum[trial] == -2) {
+                    if (trialnum[trial] >= -21 && trialnum[trial] <= -11) {
                           if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) { // if reaching into upper inaccurate zone, display inaccurate message
                               reach_feedback = "inaccurate_reach";
                               d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
@@ -819,7 +819,7 @@ var trial = {
                               d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Try again! This time closer to the centre of the circle.');
                           } else {
                               reach_feedback = "good_reach";
-                                if (trialnum[trial] == -1) {
+                                if (trialnum[trial] == -21) {
                                       d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
                                 } else if (correct_resp[trial] == 1 && cursor_x < start_x) {
                                       d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'green').text('Good job! Excellent reach!');
@@ -829,7 +829,7 @@ var trial = {
                                       d3.select('#practice_trial_message_1').attr('display', 'block').attr('fill', 'red').text('Wrong side! Try again!');
                                 }
                           }
-                    } else if (trialnum[trial] == -3 || trialnum[trial] == -4) {
+                    } else if (trialnum[trial] >= -10 && trialnum[trial] <= -1) {
                           if (cursor_x < start_x) {
                               participant_category_resp = "A"
                                   if (hand_fb_angle > angle_sens && hand_fb_angle < (180 - angle_sens)) {
@@ -1060,7 +1060,6 @@ var trial = {
                     d3.select('#inaccurate_message').attr('display', 'none');
                     d3.select('#trialcount').attr('display', 'block');
                     d3.select('#start').attr('display', 'none');
-                    console.log('CANT WAKE UP')
                 } else {
                     // Start next trial
                     search_phase();
